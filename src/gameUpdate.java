@@ -54,8 +54,8 @@ public class gameUpdate implements Runnable, KeyListener {
     // config for grid style
     int gridStartX = 235;
     int gridStartY = 100;
-    char gridSizeX = 11;
-    char gridSizeY = 11;
+    char gridSizeX = 7;
+    char gridSizeY = 7;
     char rectInGridSizeX = 30;
     char rectInGridSizeY = 30;
 
@@ -142,26 +142,7 @@ public class gameUpdate implements Runnable, KeyListener {
                 g = (Graphics2D) backBuffer.getDrawGraphics();
                 g.clearRect(0, 0, 800, 600);
 
-                // paints the green background
-                for (int setupGreenGridY = 0; setupGreenGridY < gridSizeY; setupGreenGridY++) {
-                    for (int setupGreenGridX = 0; setupGreenGridX < gridSizeX; setupGreenGridX++) {
-                        if (setupGreenGridY % 2 == 0) {
-                            if (setupGreenGridX % 2 == 0) {
-                                g.setColor(new Color(10, 200, 50));
-                            } else {
-                                g.setColor(new Color(50, 180, 50));
-                            }
-                        } else {
-                            if (setupGreenGridX % 2 == 0) {
-                                g.setColor(new Color(50, 180, 50));
-                            } else {
-                                g.setColor(new Color(10, 200, 50));
-                            }
-                        }
-                        g.fillRect(gridStartX + rectInGridSizeX * setupGreenGridX,
-                                gridStartY + rectInGridSizeY * setupGreenGridY, rectInGridSizeX, rectInGridSizeY);
-                    }
-                }
+                draBackGround(snekUpdateGridX, snekUpdateGridY);
 
                 g.setColor(Color.BLACK);
 
@@ -171,7 +152,7 @@ public class gameUpdate implements Runnable, KeyListener {
 
                         // responsible for drawing logic
                         if (snekGrid[snekUpdateGridX][snekUpdateGridY] != 0) {
-                            drawSnek(snekUpdateGridX, snekUpdateGridY);
+                            drawSnek(snekUpdateGridX, snekUpdateGridY, alive);
                         }
 
                         // draws apple without any extra logic
@@ -182,14 +163,9 @@ public class gameUpdate implements Runnable, KeyListener {
                     }
                 }
 
-                // toggle to display value for each cell
+                // display value for each cell
                 if (debug) {
-                    for (snekUpdateGridX = 0; snekUpdateGridX < gridSizeX + 2; snekUpdateGridX++) {
-                        for (snekUpdateGridY = 0; snekUpdateGridY < gridSizeY + 2; snekUpdateGridY++) {
-                            g.drawString(Integer.toString(snekGrid[snekUpdateGridX][snekUpdateGridY]),
-                                    217 + (30 * snekUpdateGridX), 90 + (30 * snekUpdateGridY));
-                        }
-                    }
+                    drawDebug(snekUpdateGridX, snekUpdateGridY);
                 }
 
                 // send graphics to Canvas
@@ -251,8 +227,8 @@ public class gameUpdate implements Runnable, KeyListener {
                     }
                 }
 
-                // apple shit
-                if (appleCountOnScreenCurrentFrame >= appleCountOnScreenPreviousFrame) {
+                // apple eaten detection
+                if (appleCountOnScreenCurrentFrame >= appleCountOnScreenPreviousFrame && alive == true) {
 
                     // Update entire grid
                     for (snekUpdateGridX = 1; snekUpdateGridX < gridSizeX + 2; snekUpdateGridX++) {
@@ -287,24 +263,94 @@ public class gameUpdate implements Runnable, KeyListener {
 
                 timeDelayed = 0;
 
-                if (!alive) {
+            }
 
-                    // starts buffer
-                    g = (Graphics2D) backBuffer.getDrawGraphics();
+            if (!alive) {
 
-                    g.clearRect(0, 0, 800, 600);
+                // starts buffer
+                g = (Graphics2D) backBuffer.getDrawGraphics();
+                g.clearRect(0, 0, 800, 600);
 
-                    Font stringFont = new Font("SansSerif", Font.PLAIN, 50);
-                    g.setFont(stringFont);
+                draBackGround(snekUpdateGridX, snekUpdateGridY);
 
-                    System.out.println("game over, for real this time");
-                    g.setColor(Color.BLACK);
-                    g.drawString("Game Over!", 250, 200);
+                deadHead: {
 
-                    // send graphics to Canvas
-                    g.dispose();
-                    backBuffer.show();
+                    // snek drawing logic loop
+                    for (snekUpdateGridX = 1; snekUpdateGridX < gridSizeX + 1; snekUpdateGridX++) {
+                        for (snekUpdateGridY = 1; snekUpdateGridY < gridSizeY + 1; snekUpdateGridY++) {
+
+                            // responsible for drawing logic
+                            if (snekGrid[snekUpdateGridX][snekUpdateGridY] != 0) {
+                                drawSnek(snekUpdateGridX, snekUpdateGridY, alive);
+                            }
+
+                            // draws apple without any extra logic
+                            if (snekGrid[snekUpdateGridX][snekUpdateGridY] == appleIndexNumber) {
+                                g.drawImage(apple, 160 + (30 * snekUpdateGridX), 37 + (30 * snekUpdateGridY), 120, 120,
+                                        null);
+                            }
+                        }
+                    }
+
+                    for (snekUpdateGridX = 1; snekUpdateGridX < gridSizeX + 1; snekUpdateGridX++) {
+                        for (snekUpdateGridY = 1; snekUpdateGridY < gridSizeY + 1; snekUpdateGridY++) {
+                            if (snekGrid[snekUpdateGridX][snekUpdateGridY] == applesEaten + 2) {
+
+                                // rule for head east
+                                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX -
+                                        1][snekUpdateGridY] + 1) {
+                                    g.drawImage(headEastDead, 160 + (30 * snekUpdateGridX), 25 + (30 *
+                                            snekUpdateGridY), 120, 120, null);
+
+                                    break deadHead;
+                                }
+
+                                // rule for head south
+                                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
+                                        - 1] + 1) {
+
+                                    g.drawImage(headSouthDead, 160 + (30 * snekUpdateGridX), 25 + (30 *
+                                            snekUpdateGridY), 120, 120, null);
+
+                                    break deadHead;
+                                }
+
+                                // rule for head north
+                                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
+                                        + 1] + 1) {
+
+                                    g.drawImage(headNorthDead, 160 + (30 * snekUpdateGridX), 25 + (30 *
+                                            snekUpdateGridY), 120, 120, null);
+
+                                    break deadHead;
+                                }
+                                // rule for head west
+                                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX +
+                                        1][snekUpdateGridY] + 1) {
+                                    g.drawImage(headWestDead, 160 + (30 * snekUpdateGridX), 25 + (30 *
+                                            snekUpdateGridY), 120, 120, null);
+
+                                    break deadHead;
+                                }
+                            }
+                        }
+                    }
                 }
+
+                // display value for each cell
+                if (debug) {
+                    drawDebug(snekUpdateGridX, snekUpdateGridY);
+                }
+
+                Font stringFont = new Font("SansSerif", Font.PLAIN, 50);
+                g.setFont(stringFont);
+
+                g.setColor(Color.BLACK);
+                g.drawString("Game Over!", 250, 100);
+
+                // send graphics to Canvas
+                g.dispose();
+                backBuffer.show();
             }
 
         }
@@ -365,7 +411,7 @@ public class gameUpdate implements Runnable, KeyListener {
         }
     }
 
-    void drawSnek(int snekUpdateGridX, int snekUpdateGridY) {
+    void drawSnek(int snekUpdateGridX, int snekUpdateGridY, boolean alive) {
 
         /*
          * NOTE:
@@ -373,20 +419,20 @@ public class gameUpdate implements Runnable, KeyListener {
          * value by one. This would idicate that the next segment of the body should
          * come ether before of after
          * 
-         * It also draws the correct turn, head and tail orientation
+         * This means that it also draws the correct turn, head and tail orientation
          * 
          */
 
         // contains all the rules for head
         head: {
-            if (snekGrid[snekUpdateGridX][snekUpdateGridY] == applesEaten + 3) {
-
+            if (snekGrid[snekUpdateGridX][snekUpdateGridY] == applesEaten + 3 && alive == true) {
+                System.out.println("dead?");
                 // rule for head east
                 if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX -
                         1][snekUpdateGridY] + 1) {
-
                     g.drawImage(headEast, 160 + (30 * snekUpdateGridX), 25 + (30 *
                             snekUpdateGridY), 120, 120, null);
+
                     break head;
                 }
 
@@ -395,6 +441,7 @@ public class gameUpdate implements Runnable, KeyListener {
 
                     g.drawImage(headSouth, 160 + (30 * snekUpdateGridX), 25 + (30 *
                             snekUpdateGridY), 120, 120, null);
+
                     break head;
                 }
 
@@ -403,15 +450,16 @@ public class gameUpdate implements Runnable, KeyListener {
 
                     g.drawImage(headNorth, 160 + (30 * snekUpdateGridX), 25 + (30 *
                             snekUpdateGridY), 120, 120, null);
+
                     break head;
                 }
 
                 // rule for head west
                 if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX +
                         1][snekUpdateGridY] + 1) {
-
                     g.drawImage(headWest, 160 + (30 * snekUpdateGridX), 25 + (30 *
                             snekUpdateGridY), 120, 120, null);
+
                     break head;
                 }
             }
@@ -540,5 +588,37 @@ public class gameUpdate implements Runnable, KeyListener {
     void drawApple(int snekUpdateGridX, int snekUpdateGridY) {
         snekGrid[snekUpdateGridX][snekUpdateGridY] = appleIndexNumber;
         g.drawImage(apple, 160 + (30 * snekUpdateGridX), 37 + (30 * snekUpdateGridY), 120, 120, null);
+    }
+
+    void drawDebug(int snekUpdateGridX, int setupGreenGridY) {
+        for (snekUpdateGridX = 0; snekUpdateGridX < gridSizeX + 2; snekUpdateGridX++) {
+            for (snekUpdateGridY = 0; snekUpdateGridY < gridSizeY + 2; snekUpdateGridY++) {
+                g.drawString(Integer.toString(snekGrid[snekUpdateGridX][snekUpdateGridY]),
+                        217 + (30 * snekUpdateGridX), 90 + (30 * snekUpdateGridY));
+            }
+        }
+    }
+
+    void draBackGround(int setupGreenGridX, int setupGreenGridY) {
+        // paints the green background
+        for (setupGreenGridY = 0; setupGreenGridY < gridSizeY; setupGreenGridY++) {
+            for (setupGreenGridX = 0; setupGreenGridX < gridSizeX; setupGreenGridX++) {
+                if (setupGreenGridY % 2 == 0) {
+                    if (setupGreenGridX % 2 == 0) {
+                        g.setColor(new Color(10, 200, 50));
+                    } else {
+                        g.setColor(new Color(50, 180, 50));
+                    }
+                } else {
+                    if (setupGreenGridX % 2 == 0) {
+                        g.setColor(new Color(50, 180, 50));
+                    } else {
+                        g.setColor(new Color(10, 200, 50));
+                    }
+                }
+                g.fillRect(gridStartX + rectInGridSizeX * setupGreenGridX,
+                        gridStartY + rectInGridSizeY * setupGreenGridY, rectInGridSizeX, rectInGridSizeY);
+            }
+        }
     }
 }

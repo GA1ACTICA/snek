@@ -16,7 +16,7 @@ public class snek extends Canvas {
         frame.add(canvas);
         frame.setSize(width, height);
         frame.setVisible(true);
-        frame.setResizable(true);
+        frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         canvas.setBackground(Color.YELLOW);
         canvas.requestFocus(); // Request focus for key events
