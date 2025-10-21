@@ -29,9 +29,9 @@ public class gameUpdate implements Runnable, KeyListener {
             System.out.println("keyTyped: " + keyReleased);
         }
 
-        if (keyReleased == 0 && debug == false) {
+        if (keyReleased == 0 || keyReleased == 112 && debug == false) {
             debug = true;
-        } else if (keyReleased == 0 && debug == true) {
+        } else if (keyReleased == 0 || keyReleased == 112 && debug == true) {
             debug = false;
         }
     }
@@ -54,8 +54,8 @@ public class gameUpdate implements Runnable, KeyListener {
     // config for grid style
     int gridStartX = 235;
     int gridStartY = 100;
-    char gridSizeX = 7;
-    char gridSizeY = 7;
+    char gridSizeX = 10;
+    char gridSizeY = 10;
     char rectInGridSizeX = 30;
     char rectInGridSizeY = 30;
 
@@ -69,7 +69,7 @@ public class gameUpdate implements Runnable, KeyListener {
     int appleIndexNumber = gridSizeX * gridSizeY + 1;
     byte appleCountOnScreenCurrentFrame = 0;
     byte appleCountOnScreenPreviousFrame = 0;
-    int maxAppleCountOnScreen = 2 - 1;
+    int maxAppleCountOnScreen = 10 - 1;
     int applesEaten = 0;
 
     Image apple = new ImageIcon(getClass().getResource("sprites/Apple.png")).getImage();
@@ -137,7 +137,7 @@ public class gameUpdate implements Runnable, KeyListener {
 
         while (alive) {
 
-            if (timeDelayed < 750 + (-10 * Math.round(30 + (-30 * Math.pow(0.9, applesEaten))))) {
+            if (timeDelayed < 500 + (-10 * Math.round(30 + (-30 * Math.pow(0.9, applesEaten))))) {
                 // starts buffer
                 g = (Graphics2D) backBuffer.getDrawGraphics();
                 g.clearRect(0, 0, 800, 600);
@@ -426,7 +426,6 @@ public class gameUpdate implements Runnable, KeyListener {
         // contains all the rules for head
         head: {
             if (snekGrid[snekUpdateGridX][snekUpdateGridY] == applesEaten + 3 && alive == true) {
-                System.out.println("dead?");
                 // rule for head east
                 if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX -
                         1][snekUpdateGridY] + 1) {
