@@ -6,9 +6,9 @@
 
 ### **This code has been blessed by the absence of AI!**
 
-<div style="text-align: center;">
+<p align="center">
     <img src="images/Snek.png">
-</div>
+</p>
 
 ## **Some stuff I learnt along the way**
 
@@ -20,15 +20,11 @@
 - ### `Objects and classes`
 
 ### But I don't think it will be long befor I get used to them and how they work.
+<pre>
 
-<div style="text-align: left; padding-left: 100px">
+                        <img src="images/Apple_Leaning_Right.png" >
+
+                                                                                                                <img src="images/Apple_Leaning_Left.png" >
+
     <img src="images/Apple_Leaning_Right.png" >
-</div>
-
-<div style="text-align: right; padding-right: 100px">
-    <img src="images/Apple_Leaning_Left.png" >
-</div>
-
-<div style="text-align: left; padding-left: 200px">
-    <img src="images/Apple_Leaning_Right.png" >
-</div>
+</pre>
