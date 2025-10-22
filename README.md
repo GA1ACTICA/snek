@@ -24,7 +24,7 @@
 
                         <img src="images/Apple_Leaning_Right.png" >
 
-                                                                                                                <img src="images/Apple_Leaning_Left.png" >
+                                                            <img src="images/Apple_Leaning_Left.png" >
 
     <img src="images/Apple_Leaning_Right.png" >
 </pre>
