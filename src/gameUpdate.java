@@ -26,13 +26,11 @@ public class gameUpdate implements Runnable, KeyListener {
         keyReleased = e.getKeyCode();
 
         if (debug) {
-            System.out.println("keyTyped: " + keyReleased);
+            System.out.println("keyReleased: " + keyReleased);
         }
 
-        if (keyReleased == 0 || keyReleased == 112 && debug == false) {
-            debug = true;
-        } else if (keyReleased == 0 || keyReleased == 112 && debug == true) {
-            debug = false;
+        if (keyReleased == 0 || keyReleased == 112) {
+            debug = !debug;
         }
     }
 
@@ -69,7 +67,7 @@ public class gameUpdate implements Runnable, KeyListener {
     int appleIndexNumber = gridSizeX * gridSizeY + 1;
     byte appleCountOnScreenCurrentFrame = 0;
     byte appleCountOnScreenPreviousFrame = 0;
-    int maxAppleCountOnScreen = 10 - 1;
+    int maxAppleCountOnScreen = 3 - 1;
     int applesEaten = 0;
 
     Image apple = new ImageIcon(getClass().getResource("sprites/Apple.png")).getImage();
@@ -137,224 +135,227 @@ public class gameUpdate implements Runnable, KeyListener {
 
         while (alive) {
 
-            if (timeDelayed < 500 + (-10 * Math.round(30 + (-30 * Math.pow(0.9, applesEaten))))) {
-                // starts buffer
-                g = (Graphics2D) backBuffer.getDrawGraphics();
-                g.clearRect(0, 0, 800, 600);
+            inputUpade();
+            render();
 
-                draBackGround(snekUpdateGridX, snekUpdateGridY);
+            // dealys the program for 0.5 second
+            try {
+                Thread.sleep(750 + (-10 * Math.round(30 + (-30 * Math.pow(0.9, applesEaten)))));
 
-                g.setColor(Color.BLACK);
-
-                // snek drawing logic loop
-                for (snekUpdateGridX = 1; snekUpdateGridX < gridSizeX + 1; snekUpdateGridX++) {
-                    for (snekUpdateGridY = 1; snekUpdateGridY < gridSizeY + 1; snekUpdateGridY++) {
-
-                        // responsible for drawing logic
-                        if (snekGrid[snekUpdateGridX][snekUpdateGridY] != 0) {
-                            drawSnek(snekUpdateGridX, snekUpdateGridY, alive);
-                        }
-
-                        // draws apple without any extra logic
-                        if (snekGrid[snekUpdateGridX][snekUpdateGridY] == appleIndexNumber) {
-                            g.drawImage(apple, 160 + (30 * snekUpdateGridX), 37 + (30 * snekUpdateGridY), 120, 120,
-                                    null);
-                        }
-                    }
-                }
-
-                // display value for each cell
-                if (debug) {
-                    drawDebug(snekUpdateGridX, snekUpdateGridY);
-                }
-
-                // send graphics to Canvas
-                g.dispose();
-                backBuffer.show();
-
-                // dealys the program for 0.5 second
-                try {
-                    Thread.sleep(20);
-                    timeDelayed += 20;
-                } catch (Exception e) {
-                    System.out.println(e);
-                }
-
-            } else {
-
-                // reset appleCountOnScreenCurrentFrame
-                appleCountOnScreenCurrentFrame = 0;
-
-                // get inputs
-                if (keyPressed == 65 || keyPressed == 37) {
-                    west = true;
-                    north = false;
-                    east = false;
-                    south = false;
-                }
-
-                else if (keyPressed == 68 || keyPressed == 39) {
-                    east = true;
-                    north = false;
-                    west = false;
-                    south = false;
-                }
-
-                else if (keyPressed == 87 || keyPressed == 38) {
-                    north = true;
-                    west = false;
-                    east = false;
-                    south = false;
-                }
-
-                else if (keyPressed == 83 || keyPressed == 40) {
-                    south = true;
-                    north = false;
-                    west = false;
-                    east = false;
-                }
-
-                // update cell value loop
-                for (snekUpdateGridX = 1; snekUpdateGridX < gridSizeX + 1; snekUpdateGridX++) {
-                    for (snekUpdateGridY = 1; snekUpdateGridY < gridSizeY + 1; snekUpdateGridY++) {
-                        if (snekGrid[snekUpdateGridX][snekUpdateGridY] == applesEaten + 3) {
-                            updateCellValue(snekUpdateGridX, snekUpdateGridY, west, east, south, north);
-                        }
-
-                        if (snekGrid[snekUpdateGridX][snekUpdateGridY] == appleIndexNumber) {
-                            appleCountOnScreenCurrentFrame++;
-                        }
-                    }
-                }
-
-                // apple eaten detection
-                if (appleCountOnScreenCurrentFrame >= appleCountOnScreenPreviousFrame && alive == true) {
-
-                    // Update entire grid
-                    for (snekUpdateGridX = 1; snekUpdateGridX < gridSizeX + 2; snekUpdateGridX++) {
-                        for (snekUpdateGridY = 1; snekUpdateGridY < gridSizeY + 2; snekUpdateGridY++) {
-                            if (snekGrid[snekUpdateGridX][snekUpdateGridY] != 0
-                                    && snekGrid[snekUpdateGridX][snekUpdateGridY] != appleIndexNumber) {
-                                snekGrid[snekUpdateGridX][snekUpdateGridY]--;
-                            }
-                        }
-                    }
-
-                } else {
-                    applesEaten++;
-                }
-
-                appleCountOnScreenPreviousFrame = appleCountOnScreenCurrentFrame;
-
-                // apple spawning loop
-                for (snekUpdateGridX = 1; snekUpdateGridX < gridSizeX + 1; snekUpdateGridX++) {
-                    for (snekUpdateGridY = 1; snekUpdateGridY < gridSizeY + 1; snekUpdateGridY++) {
-
-                        random = Math.round(Math.random() * 50);
-
-                        // responisble for placing tha apple
-                        if (snekGrid[snekUpdateGridX][snekUpdateGridY] == 0
-                                && appleCountOnScreenCurrentFrame <= maxAppleCountOnScreen && 1 == random) {
-                            appleCountOnScreenCurrentFrame++;
-                            drawApple(snekUpdateGridX, snekUpdateGridY);
-                        }
-                    }
-                }
-
-                timeDelayed = 0;
-
+            } catch (Exception e) {
+                System.out.println(e);
             }
-
-            if (!alive) {
-
-                // starts buffer
-                g = (Graphics2D) backBuffer.getDrawGraphics();
-                g.clearRect(0, 0, 800, 600);
-
-                draBackGround(snekUpdateGridX, snekUpdateGridY);
-
-                deadHead: {
-
-                    // snek drawing logic loop
-                    for (snekUpdateGridX = 1; snekUpdateGridX < gridSizeX + 1; snekUpdateGridX++) {
-                        for (snekUpdateGridY = 1; snekUpdateGridY < gridSizeY + 1; snekUpdateGridY++) {
-
-                            // responsible for drawing logic
-                            if (snekGrid[snekUpdateGridX][snekUpdateGridY] != 0) {
-                                drawSnek(snekUpdateGridX, snekUpdateGridY, alive);
-                            }
-
-                            // draws apple without any extra logic
-                            if (snekGrid[snekUpdateGridX][snekUpdateGridY] == appleIndexNumber) {
-                                g.drawImage(apple, 160 + (30 * snekUpdateGridX), 37 + (30 * snekUpdateGridY), 120, 120,
-                                        null);
-                            }
-                        }
-                    }
-
-                    for (snekUpdateGridX = 1; snekUpdateGridX < gridSizeX + 1; snekUpdateGridX++) {
-                        for (snekUpdateGridY = 1; snekUpdateGridY < gridSizeY + 1; snekUpdateGridY++) {
-                            if (snekGrid[snekUpdateGridX][snekUpdateGridY] == applesEaten + 2) {
-
-                                // rule for head east
-                                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX -
-                                        1][snekUpdateGridY] + 1) {
-                                    g.drawImage(headEastDead, 160 + (30 * snekUpdateGridX), 25 + (30 *
-                                            snekUpdateGridY), 120, 120, null);
-
-                                    break deadHead;
-                                }
-
-                                // rule for head south
-                                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
-                                        - 1] + 1) {
-
-                                    g.drawImage(headSouthDead, 160 + (30 * snekUpdateGridX), 25 + (30 *
-                                            snekUpdateGridY), 120, 120, null);
-
-                                    break deadHead;
-                                }
-
-                                // rule for head north
-                                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
-                                        + 1] + 1) {
-
-                                    g.drawImage(headNorthDead, 160 + (30 * snekUpdateGridX), 25 + (30 *
-                                            snekUpdateGridY), 120, 120, null);
-
-                                    break deadHead;
-                                }
-                                // rule for head west
-                                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX +
-                                        1][snekUpdateGridY] + 1) {
-                                    g.drawImage(headWestDead, 160 + (30 * snekUpdateGridX), 25 + (30 *
-                                            snekUpdateGridY), 120, 120, null);
-
-                                    break deadHead;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // display value for each cell
-                if (debug) {
-                    drawDebug(snekUpdateGridX, snekUpdateGridY);
-                }
-
-                Font stringFont = new Font("SansSerif", Font.PLAIN, 50);
-                g.setFont(stringFont);
-
-                g.setColor(Color.BLACK);
-                g.drawString("Game Over!", 250, 100);
-
-                // send graphics to Canvas
-                g.dispose();
-                backBuffer.show();
-            }
-
         }
 
+        while (!alive) {
+            gameOver();
+        }
+
+    }
+
+    public void render() {
+
+        g = (Graphics2D) backBuffer.getDrawGraphics();
+
+        drawBackground(snekUpdateGridX, snekUpdateGridY);
+
+        g.setColor(Color.BLACK);
+
+        // snek drawing logic loop
+        for (snekUpdateGridX = 1; snekUpdateGridX < gridSizeX + 1; snekUpdateGridX++) {
+            for (snekUpdateGridY = 1; snekUpdateGridY < gridSizeY + 1; snekUpdateGridY++) {
+
+                // responsible for drawing logic
+                if (snekGrid[snekUpdateGridX][snekUpdateGridY] != 0) {
+                    drawSnek(snekUpdateGridX, snekUpdateGridY, alive);
+                }
+
+                // draws apple without any extra logic
+                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == appleIndexNumber) {
+                    g.drawImage(apple, 160 + (30 * snekUpdateGridX), 37 + (30 * snekUpdateGridY), 120, 120,
+                            null);
+                }
+            }
+        }
+
+        // apple spawning loop
+        for (snekUpdateGridX = 1; snekUpdateGridX < gridSizeX + 1; snekUpdateGridX++) {
+            for (snekUpdateGridY = 1; snekUpdateGridY < gridSizeY + 1; snekUpdateGridY++) {
+
+                random = Math.round(Math.random() * 50);
+
+                // responisble for placing tha apple
+                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == 0
+                        && appleCountOnScreenCurrentFrame <= maxAppleCountOnScreen && 1 == random) {
+                    appleCountOnScreenCurrentFrame++;
+                    drawApple(snekUpdateGridX, snekUpdateGridY);
+                }
+            }
+        }
+
+        // display value for each cell
+        if (debug) {
+            drawDebug(snekUpdateGridX, snekUpdateGridY);
+        }
+
+        // Display the buffer
+        backBuffer.show();
+        g.dispose();
+
+    }
+
+    void inputUpade() {
+        // reset appleCountOnScreenCurrentFrame
+        appleCountOnScreenCurrentFrame = 0;
+
+        // get inputs
+        if (keyPressed == 65 || keyPressed == 37) {
+            west = true;
+            north = false;
+            east = false;
+            south = false;
+        }
+
+        else if (keyPressed == 68 || keyPressed == 39) {
+            east = true;
+            north = false;
+            west = false;
+            south = false;
+        }
+
+        else if (keyPressed == 87 || keyPressed == 38) {
+            north = true;
+            west = false;
+            east = false;
+            south = false;
+        }
+
+        else if (keyPressed == 83 || keyPressed == 40) {
+            south = true;
+            north = false;
+            west = false;
+            east = false;
+        }
+
+        // update cell value loop
+        for (snekUpdateGridX = 1; snekUpdateGridX < gridSizeX + 1; snekUpdateGridX++) {
+            for (snekUpdateGridY = 1; snekUpdateGridY < gridSizeY + 1; snekUpdateGridY++) {
+                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == applesEaten + 3) {
+                    updateCellValue(snekUpdateGridX, snekUpdateGridY, west, east, south, north);
+                }
+
+                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == appleIndexNumber) {
+                    appleCountOnScreenCurrentFrame++;
+                }
+            }
+        }
+
+        // apple eaten detection
+        if (appleCountOnScreenCurrentFrame >= appleCountOnScreenPreviousFrame && alive == true) {
+
+            // Update entire grid
+            for (snekUpdateGridX = 1; snekUpdateGridX < gridSizeX + 2; snekUpdateGridX++) {
+                for (snekUpdateGridY = 1; snekUpdateGridY < gridSizeY + 2; snekUpdateGridY++) {
+                    if (snekGrid[snekUpdateGridX][snekUpdateGridY] != 0
+                            && snekGrid[snekUpdateGridX][snekUpdateGridY] != appleIndexNumber) {
+                        snekGrid[snekUpdateGridX][snekUpdateGridY]--;
+                    }
+                }
+            }
+
+        } else {
+            applesEaten++;
+        }
+
+        appleCountOnScreenPreviousFrame = appleCountOnScreenCurrentFrame;
+    }
+
+    void gameOver() {
+
+        // starts buffer
+        g = (Graphics2D) backBuffer.getDrawGraphics();
+        g.clearRect(0, 0, 800, 600);
+
+        drawBackground(snekUpdateGridX, snekUpdateGridY);
+
+        deadHead: {
+
+            // snek drawing logic loop
+            for (snekUpdateGridX = 1; snekUpdateGridX < gridSizeX + 1; snekUpdateGridX++) {
+                for (snekUpdateGridY = 1; snekUpdateGridY < gridSizeY + 1; snekUpdateGridY++) {
+
+                    // responsible for drawing logic
+                    if (snekGrid[snekUpdateGridX][snekUpdateGridY] != 0) {
+                        drawSnek(snekUpdateGridX, snekUpdateGridY, alive);
+                    }
+
+                    // draws apple without any extra logic
+                    if (snekGrid[snekUpdateGridX][snekUpdateGridY] == appleIndexNumber) {
+                        g.drawImage(apple, 160 + (30 * snekUpdateGridX), 37 + (30 * snekUpdateGridY), 120, 120,
+                                null);
+                    }
+                }
+            }
+
+            for (snekUpdateGridX = 1; snekUpdateGridX < gridSizeX + 1; snekUpdateGridX++) {
+                for (snekUpdateGridY = 1; snekUpdateGridY < gridSizeY + 1; snekUpdateGridY++) {
+                    if (snekGrid[snekUpdateGridX][snekUpdateGridY] == applesEaten + 2) {
+
+                        // rule for head east
+                        if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX -
+                                1][snekUpdateGridY] + 1) {
+                            g.drawImage(headEastDead, 160 + (30 * snekUpdateGridX), 25 + (30 *
+                                    snekUpdateGridY), 120, 120, null);
+
+                            break deadHead;
+                        }
+
+                        // rule for head south
+                        if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
+                                - 1] + 1) {
+
+                            g.drawImage(headSouthDead, 160 + (30 * snekUpdateGridX), 25 + (30 *
+                                    snekUpdateGridY), 120, 120, null);
+
+                            break deadHead;
+                        }
+
+                        // rule for head north
+                        if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
+                                + 1] + 1) {
+
+                            g.drawImage(headNorthDead, 160 + (30 * snekUpdateGridX), 25 + (30 *
+                                    snekUpdateGridY), 120, 120, null);
+
+                            break deadHead;
+                        }
+                        // rule for head west
+                        if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX +
+                                1][snekUpdateGridY] + 1) {
+                            g.drawImage(headWestDead, 160 + (30 * snekUpdateGridX), 25 + (30 *
+                                    snekUpdateGridY), 120, 120, null);
+
+                            break deadHead;
+                        }
+                    }
+                }
+            }
+        }
+
+        // display value for each cell
+        if (debug) {
+            drawDebug(snekUpdateGridX, snekUpdateGridY);
+        }
+
+        Font stringFont = new Font("SansSerif", Font.PLAIN, 50);
+        g.setFont(stringFont);
+
+        g.setColor(Color.BLACK);
+        g.drawString("Game Over!", 250, 100);
+
+        // send graphics to Canvas
+        g.dispose();
+        backBuffer.show();
     }
 
     void updateCellValue(int snekUpdateGridX, int snekUpdateGridY, boolean west, boolean east, boolean north,
@@ -598,7 +599,7 @@ public class gameUpdate implements Runnable, KeyListener {
         }
     }
 
-    void draBackGround(int setupGreenGridX, int setupGreenGridY) {
+    void drawBackground(int setupGreenGridX, int setupGreenGridY) {
         // paints the green background
         for (setupGreenGridY = 0; setupGreenGridY < gridSizeY; setupGreenGridY++) {
             for (setupGreenGridX = 0; setupGreenGridX < gridSizeX; setupGreenGridX++) {
