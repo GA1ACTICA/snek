@@ -2,7 +2,9 @@
 
 ### Snek was my first java project for my java programing course in school. Some may say it seems ambitious but I think this is the best way for me to learn. I take on a big project and learn new stuff on the way.
 
-### Snek is written entirely in java using the AWT canvas class. All sprites are made by me and I can proudly say that:
+### Snek is written entirely in java using the AWT canvas class. All sprites are made by me.
+
+<!-- and I can proudly say that: -->
 
 <!-- ### **This code has been blessed by the absence of AI!** -->
 <!-- Well that lasted long... atleased it was only used for guidance (; -->
