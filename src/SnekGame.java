@@ -1,63 +1,17 @@
+import javax.swing.ImageIcon;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.image.BufferStrategy;
-import javax.swing.*;
 
-public class gameUpdate implements Runnable, KeyListener {
-    BufferStrategy backBuffer;
-
-    // implement KeyListener method
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        keyPressed = e.getKeyCode();
-
-        if (debug) {
-            System.out.println("keyPressed: " + keyPressed);
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        keyReleased = e.getKeyCode();
-
-        if (debug) {
-            System.out.println("keyReleased: " + keyReleased);
-        }
-
-        if (keyReleased == 0 || keyReleased == 112) {
-            debug = !debug;
-        }
-    }
-
-    Graphics g;
-    Canvas c;
-
-    // set up buffer strategy
-    public gameUpdate(Canvas c) {
-        this.c = c;
-        c.createBufferStrategy(2);
-        backBuffer = c.getBufferStrategy();
-        while (backBuffer.getDrawGraphics() == null)
-            ;
-    }
-
-    // DEBUG: Turns on and overlay that shows the value for all cells
-    boolean debug = false;
+public class SnekGame implements Drawable {
 
     // config for grid style
     int gridStartX = 235;
     int gridStartY = 100;
-    char gridSizeX = 10;
-    char gridSizeY = 10;
+    char gridSizeX = 11;
+    char gridSizeY = 11;
     char rectInGridSizeX = 30;
     char rectInGridSizeY = 30;
 
-    int[][] snekGrid = new int[gridSizeX + 2][gridSizeY + 2];
+    public int[][] snekGrid = new int[gridSizeX + 2][gridSizeY + 2];
 
     int snekUpdateGridX = 0;
     int snekUpdateGridY = 0;
@@ -68,7 +22,7 @@ public class gameUpdate implements Runnable, KeyListener {
     byte appleCountOnScreenCurrentFrame = 0;
     byte appleCountOnScreenPreviousFrame = 0;
     int maxAppleCountOnScreen = 3 - 1;
-    int applesEaten = 0;
+    public int applesEaten = 0;
 
     Image apple = new ImageIcon(getClass().getResource("sprites/Apple.png")).getImage();
 
@@ -95,8 +49,6 @@ public class gameUpdate implements Runnable, KeyListener {
     Image tailEast = new ImageIcon(getClass().getResource("sprites/East_Tail.png")).getImage();
 
     // stores the numerical value for the latest pressed key
-    int keyPressed;
-    int keyReleased;
 
     long random;
 
@@ -107,57 +59,36 @@ public class gameUpdate implements Runnable, KeyListener {
 
     int timeDelayed = 0;
 
-    boolean alive = true;
+    public boolean alive = true;
 
-    /*
-     * Order of operation:
-     * 
-     * Get user input ###
-     * 
-     * Update value for everythin acording to rules ###
-     * 
-     * Decrement everythin by one ###
-     * 
-     * Draw snek ###
-     * 
-     * Draw apple ###
-     * 
-     * Time delay ###
-     */
+    Keys keys;
+    GameState gs = new GameState();
+
+    SnekGame(Keys keys) {
+        this.keys = keys;
+    }
 
     @Override
-    public void run() {
+    public void draw(Graphics g) {
 
-        // Setup for starting position
-        snekGrid[1 + 1][1 + 1] = 1;
-        snekGrid[1 + 1][2 + 1] = 2;
-        snekGrid[1 + 1][3 + 1] = 3;
-
-        while (alive) {
-
+        if (alive) {
             inputUpade();
-            render();
-
-            // dealys the program for 0.5 second
-            try {
-                Thread.sleep(750 + (-10 * Math.round(30 + (-30 * Math.pow(0.9, applesEaten)))));
-
-            } catch (Exception e) {
-                System.out.println(e);
-            }
+            drawSnekGame(g);
         }
 
-        while (!alive) {
-            gameOver();
+        if (!alive) {
+            gameOver(g);
+        }
+
+        if (gs.debug) {
+            System.out.println(" North: " + north + " South: " + south + " West: " + west + " East: " + east);
         }
 
     }
 
-    public void render() {
+    public void drawSnekGame(Graphics g) {
 
-        g = (Graphics2D) backBuffer.getDrawGraphics();
-
-        drawBackground(snekUpdateGridX, snekUpdateGridY);
+        drawBackground(snekUpdateGridX, snekUpdateGridY, g);
 
         g.setColor(Color.BLACK);
 
@@ -167,7 +98,7 @@ public class gameUpdate implements Runnable, KeyListener {
 
                 // responsible for drawing logic
                 if (snekGrid[snekUpdateGridX][snekUpdateGridY] != 0) {
-                    drawSnek(snekUpdateGridX, snekUpdateGridY, alive);
+                    drawSnek(snekUpdateGridX, snekUpdateGridY, alive, g);
                 }
 
                 // draws apple without any extra logic
@@ -188,19 +119,15 @@ public class gameUpdate implements Runnable, KeyListener {
                 if (snekGrid[snekUpdateGridX][snekUpdateGridY] == 0
                         && appleCountOnScreenCurrentFrame <= maxAppleCountOnScreen && 1 == random) {
                     appleCountOnScreenCurrentFrame++;
-                    drawApple(snekUpdateGridX, snekUpdateGridY);
+                    drawApple(snekUpdateGridX, snekUpdateGridY, g);
                 }
             }
         }
 
         // display value for each cell
-        if (debug) {
-            drawDebug(snekUpdateGridX, snekUpdateGridY);
+        if (gs.debug) {
+            drawDebug(snekUpdateGridX, snekUpdateGridY, g);
         }
-
-        // Display the buffer
-        backBuffer.show();
-        g.dispose();
 
     }
 
@@ -208,33 +135,37 @@ public class gameUpdate implements Runnable, KeyListener {
         // reset appleCountOnScreenCurrentFrame
         appleCountOnScreenCurrentFrame = 0;
 
-        // get inputs
-        if (keyPressed == 65 || keyPressed == 37) {
+        System.out.println("debug " + keys.keyNameTyped + " debug");
+
+        // west = "a" or code "37"
+        if ((keys.keyNamePressed == 'a' || keys.keyCodePressed == 37) && east == false) {
+            System.out.println("West");
             west = true;
-            north = false;
-            east = false;
-            south = false;
+            north = east = south = false;
         }
 
-        else if (keyPressed == 68 || keyPressed == 39) {
+        // east = "d" or code "39"
+        else if ((keys.keyNamePressed == 'd' || keys.keyCodePressed == 39) && west == false) {
+            System.out.println("East");
+
             east = true;
-            north = false;
-            west = false;
-            south = false;
+            north = west = south = false;
         }
 
-        else if (keyPressed == 87 || keyPressed == 38) {
+        // north = "w" or code "38"
+        else if ((keys.keyNamePressed == 'w' || keys.keyCodePressed == 38) && south == false) {
+            System.out.println("North");
+
             north = true;
-            west = false;
-            east = false;
-            south = false;
+            west = east = south = false;
         }
 
-        else if (keyPressed == 83 || keyPressed == 40) {
+        // south = "s" or code "40"
+        else if ((keys.keyNamePressed == 's' || keys.keyCodePressed == 40) && north == false) {
+            System.out.println("South");
+
             south = true;
-            north = false;
-            west = false;
-            east = false;
+            north = west = east = false;
         }
 
         // update cell value loop
@@ -270,13 +201,9 @@ public class gameUpdate implements Runnable, KeyListener {
         appleCountOnScreenPreviousFrame = appleCountOnScreenCurrentFrame;
     }
 
-    void gameOver() {
+    void gameOver(Graphics g) {
 
-        // starts buffer
-        g = (Graphics2D) backBuffer.getDrawGraphics();
-        g.clearRect(0, 0, 800, 600);
-
-        drawBackground(snekUpdateGridX, snekUpdateGridY);
+        drawBackground(snekUpdateGridX, snekUpdateGridY, g);
 
         deadHead: {
 
@@ -286,7 +213,7 @@ public class gameUpdate implements Runnable, KeyListener {
 
                     // responsible for drawing logic
                     if (snekGrid[snekUpdateGridX][snekUpdateGridY] != 0) {
-                        drawSnek(snekUpdateGridX, snekUpdateGridY, alive);
+                        drawSnek(snekUpdateGridX, snekUpdateGridY, alive, g);
                     }
 
                     // draws apple without any extra logic
@@ -343,8 +270,8 @@ public class gameUpdate implements Runnable, KeyListener {
         }
 
         // display value for each cell
-        if (debug) {
-            drawDebug(snekUpdateGridX, snekUpdateGridY);
+        if (gs.debug) {
+            drawDebug(snekUpdateGridX, snekUpdateGridY, g);
         }
 
         Font stringFont = new Font("SansSerif", Font.PLAIN, 50);
@@ -353,9 +280,6 @@ public class gameUpdate implements Runnable, KeyListener {
         g.setColor(Color.BLACK);
         g.drawString("Game Over!", 250, 100);
 
-        // send graphics to Canvas
-        g.dispose();
-        backBuffer.show();
     }
 
     void updateCellValue(int snekUpdateGridX, int snekUpdateGridY, boolean west, boolean east, boolean north,
@@ -364,9 +288,10 @@ public class gameUpdate implements Runnable, KeyListener {
         updateHead: {
             // update head east / d or arrow right
             if (east == true) {
-                if (snekUpdateGridX == gridSizeX || snekGrid[snekUpdateGridX + 1][snekUpdateGridY] != applesEaten + 3
-                        && snekGrid[snekUpdateGridX + 1][snekUpdateGridY] != appleIndexNumber
-                        && snekGrid[snekUpdateGridX + 1][snekUpdateGridY] != 0) {
+                if (snekUpdateGridX == gridSizeX
+                        || snekGrid[snekUpdateGridX + 1][snekUpdateGridY] != applesEaten + 3
+                                && snekGrid[snekUpdateGridX + 1][snekUpdateGridY] != appleIndexNumber
+                                && snekGrid[snekUpdateGridX + 1][snekUpdateGridY] != 0) {
                     alive = false;
                 }
 
@@ -388,9 +313,10 @@ public class gameUpdate implements Runnable, KeyListener {
 
             // update head north / w or arrow up
             if (north == true) {
-                if (snekUpdateGridY == gridSizeY || snekGrid[snekUpdateGridX][snekUpdateGridY + 1] != applesEaten + 3
-                        && snekGrid[snekUpdateGridX][snekUpdateGridY + 1] != appleIndexNumber
-                        && snekGrid[snekUpdateGridX][snekUpdateGridY + 1] != 0) {
+                if (snekUpdateGridY == gridSizeY
+                        || snekGrid[snekUpdateGridX][snekUpdateGridY + 1] != applesEaten + 3
+                                && snekGrid[snekUpdateGridX][snekUpdateGridY + 1] != appleIndexNumber
+                                && snekGrid[snekUpdateGridX][snekUpdateGridY + 1] != 0) {
                     alive = false;
                 }
 
@@ -412,7 +338,7 @@ public class gameUpdate implements Runnable, KeyListener {
         }
     }
 
-    void drawSnek(int snekUpdateGridX, int snekUpdateGridY, boolean alive) {
+    void drawSnek(int snekUpdateGridX, int snekUpdateGridY, boolean alive, Graphics g) {
 
         /*
          * NOTE:
@@ -437,7 +363,8 @@ public class gameUpdate implements Runnable, KeyListener {
                 }
 
                 // rule for head south
-                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY - 1] + 1) {
+                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY - 1]
+                        + 1) {
 
                     g.drawImage(headSouth, 160 + (30 * snekUpdateGridX), 25 + (30 *
                             snekUpdateGridY), 120, 120, null);
@@ -446,7 +373,8 @@ public class gameUpdate implements Runnable, KeyListener {
                 }
 
                 // rule for head north
-                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY + 1] + 1) {
+                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY + 1]
+                        + 1) {
 
                     g.drawImage(headNorth, 160 + (30 * snekUpdateGridX), 25 + (30 *
                             snekUpdateGridY), 120, 120, null);
@@ -472,9 +400,11 @@ public class gameUpdate implements Runnable, KeyListener {
 
                 // rules for vertical snake body
                 if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY + 1] - 1
-                        && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY - 1]
+                        && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
+                                - 1]
                                 + 1
-                        || snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY + 1]
+                        || snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
+                                + 1]
                                 + 1
                                 && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
                                         - 1] - 1) {
@@ -485,10 +415,12 @@ public class gameUpdate implements Runnable, KeyListener {
 
                 // rule for horizontal snake body
                 if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX + 1][snekUpdateGridY] - 1
-                        && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX - 1][snekUpdateGridY]
+                        && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX
+                                - 1][snekUpdateGridY]
                                 + 1
                         ||
-                        snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX + 1][snekUpdateGridY] + 1
+                        snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX + 1][snekUpdateGridY]
+                                + 1
                                 && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX
                                         - 1][snekUpdateGridY] - 1) {
                     g.drawImage(westEastBody, 160 + (30 * snekUpdateGridX), 25 + (30 * snekUpdateGridY), 120, 120,
@@ -498,9 +430,11 @@ public class gameUpdate implements Runnable, KeyListener {
 
                 // rule for north east snake body
                 if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX + 1][snekUpdateGridY] + 1
-                        && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY - 1]
+                        && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
+                                - 1]
                                 - 1
-                        || snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX + 1][snekUpdateGridY]
+                        || snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX
+                                + 1][snekUpdateGridY]
                                 - 1
                                 && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
                                         - 1] + 1) {
@@ -511,9 +445,11 @@ public class gameUpdate implements Runnable, KeyListener {
 
                 // rule for west south snake body
                 if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX - 1][snekUpdateGridY] + 1
-                        && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY + 1]
+                        && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
+                                + 1]
                                 - 1
-                        || snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX - 1][snekUpdateGridY]
+                        || snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX
+                                - 1][snekUpdateGridY]
                                 - 1
                                 && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
                                         + 1] + 1) {
@@ -524,9 +460,11 @@ public class gameUpdate implements Runnable, KeyListener {
 
                 // rule for north west snake body
                 if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX - 1][snekUpdateGridY] + 1
-                        && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY - 1]
+                        && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
+                                - 1]
                                 - 1
-                        || snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX - 1][snekUpdateGridY]
+                        || snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX
+                                - 1][snekUpdateGridY]
                                 - 1
                                 && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
                                         - 1] + 1) {
@@ -537,9 +475,11 @@ public class gameUpdate implements Runnable, KeyListener {
 
                 // rule for west south snake body
                 if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX + 1][snekUpdateGridY] + 1
-                        && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY + 1]
+                        && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
+                                + 1]
                                 - 1
-                        || snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX + 1][snekUpdateGridY]
+                        || snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX
+                                + 1][snekUpdateGridY]
                                 - 1
                                 && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
                                         + 1] + 1) {
@@ -555,8 +495,10 @@ public class gameUpdate implements Runnable, KeyListener {
             if (snekGrid[snekUpdateGridX][snekUpdateGridY] == 1) {
 
                 // rule for tail west
-                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX + 1][snekUpdateGridY] - 1) {
-                    g.drawImage(tailWest, 160 + (30 * snekUpdateGridX), 25 + (30 * snekUpdateGridY), 120, 120, null);
+                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX + 1][snekUpdateGridY]
+                        - 1) {
+                    g.drawImage(tailWest, 160 + (30 * snekUpdateGridX), 25 + (30 * snekUpdateGridY), 120, 120,
+                            null);
                     break tail;
                 }
 
@@ -569,14 +511,16 @@ public class gameUpdate implements Runnable, KeyListener {
                 }
 
                 // rule for tail north
-                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY + 1] - 1) {
+                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY + 1]
+                        - 1) {
                     g.drawImage(tailNorth, 160 + (30 * snekUpdateGridX), 25 + (30 *
                             snekUpdateGridY), 120, 120, null);
                     break tail;
                 }
 
                 // rule for tail south
-                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY - 1] - 1) {
+                if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY - 1]
+                        - 1) {
                     g.drawImage(tailSouth, 160 + (30 * snekUpdateGridX), 25 + (30 *
                             snekUpdateGridY), 120, 120, null);
                     break tail;
@@ -585,12 +529,13 @@ public class gameUpdate implements Runnable, KeyListener {
         }
     }
 
-    void drawApple(int snekUpdateGridX, int snekUpdateGridY) {
+    void drawApple(int snekUpdateGridX, int snekUpdateGridY, Graphics g) {
         snekGrid[snekUpdateGridX][snekUpdateGridY] = appleIndexNumber;
         g.drawImage(apple, 160 + (30 * snekUpdateGridX), 37 + (30 * snekUpdateGridY), 120, 120, null);
     }
 
-    void drawDebug(int snekUpdateGridX, int setupGreenGridY) {
+    void drawDebug(int snekUpdateGridX, int setupGreenGridY, Graphics g) {
+        g.setColor(Color.BLACK);
         for (snekUpdateGridX = 0; snekUpdateGridX < gridSizeX + 2; snekUpdateGridX++) {
             for (snekUpdateGridY = 0; snekUpdateGridY < gridSizeY + 2; snekUpdateGridY++) {
                 g.drawString(Integer.toString(snekGrid[snekUpdateGridX][snekUpdateGridY]),
@@ -599,7 +544,7 @@ public class gameUpdate implements Runnable, KeyListener {
         }
     }
 
-    void drawBackground(int setupGreenGridX, int setupGreenGridY) {
+    void drawBackground(int setupGreenGridX, int setupGreenGridY, Graphics g) {
         // paints the green background
         for (setupGreenGridY = 0; setupGreenGridY < gridSizeY; setupGreenGridY++) {
             for (setupGreenGridX = 0; setupGreenGridX < gridSizeX; setupGreenGridX++) {
@@ -621,4 +566,5 @@ public class gameUpdate implements Runnable, KeyListener {
             }
         }
     }
+
 }

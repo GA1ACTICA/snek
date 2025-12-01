@@ -4,7 +4,8 @@
 
 ### Snek is written entirely in java using the AWT canvas class. All sprites are made by me and I can proudly say that:
 
-### **This code has been blessed by the absence of AI!**
+<!-- ### **This code has been blessed by the absence of AI!** -->
+<!-- Well that lasted long... atleased it was only used for guidance (; -->
 
 <p align="center">
     <img src="images/Snek.png">
@@ -17,9 +18,10 @@
 
 ## **I am still learning about**
 
-- ### `Objects and classes`
+- ### `More advanced use cases for objects and classes`
 
 ### But I don't think it will be long befor I get used to them and how they work.
+
 <pre>
 
                         <img src="images/Apple_Leaning_Right.png" >
