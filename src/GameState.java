@@ -1,5 +1,11 @@
+import java.awt.Color;
+
 public class GameState {
 
-    public boolean debug = false;
+    Color backgroundColor = Color.YELLOW;
+
+    public boolean debug = true;
+    public int snekGameUpdateInterval = 750;
+    public boolean alive = true;
 
 }

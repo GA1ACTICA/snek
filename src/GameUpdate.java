@@ -1,73 +1,58 @@
-import java.awt.*;
-import java.awt.image.BufferStrategy;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GameUpdate implements Runnable {
 
-    BufferStrategy backBuffer;
-    Graphics2D g;
-    Canvas c;
+    GameState gs;
+    Menu menu;
     SnekGame sg;
     Keys keys;
+    GamePanel panel;
 
-    GameState gs = new GameState();
+    public static List<Drawable> drawables = new ArrayList<>();
 
-    public GameUpdate(Canvas c, Keys keys) {
-        this.c = c;
-        this.keys = keys;
-        this.sg = new SnekGame(keys);
-    }
-
-    private List<Drawable> drawables = new ArrayList<>();
     boolean running = true;
+    long lastUpdateTime;
+    long currentTime;
 
-    public void init() {
+    public GameUpdate(Keys keys, GameState gs, GamePanel panel) {
 
-        c.createBufferStrategy(2);
-        backBuffer = c.getBufferStrategy();
-
-        if (backBuffer == null) {
-            throw new IllegalStateException("BufferStrategy falied to initialize");
-        }
-
-        drawables.add(sg);
+        this.gs = gs;
+        this.keys = keys;
+        this.panel = panel;
+        this.menu = new Menu(gs);
+        this.sg = new SnekGame(keys, gs, menu);
     }
 
     @Override
     public void run() {
+
+        drawables.add(sg);
+        drawables.add(menu);
 
         // Setup for starting position
         sg.snekGrid[1 + 1][1 + 1] = 1;
         sg.snekGrid[1 + 1][2 + 1] = 2;
         sg.snekGrid[1 + 1][3 + 1] = 3;
 
+        lastUpdateTime = System.currentTimeMillis();
+
         while (running) {
 
-            render();
+            currentTime = System.currentTimeMillis();
+
+            if (currentTime - lastUpdateTime >= gs.snekGameUpdateInterval) {
+                sg.updateGameLogic();
+                lastUpdateTime = currentTime;
+            }
+
+            panel.repaint();
 
             try {
-                Thread.sleep(750 + (-10 * Math.round(30 + (-30 * Math.pow(0.9, sg.applesEaten)))));
-
-            } catch (Exception e) {
-                System.out.println(e);
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
-    }
-
-    private void render() {
-
-        g = (Graphics2D) backBuffer.getDrawGraphics();
-
-        g.setColor(Color.YELLOW);
-        g.fillRect(0, 0, c.getWidth(), c.getHeight());
-
-        for (Drawable d : drawables) {
-            d.draw(g);
-        }
-
-        g.dispose();
-        backBuffer.show();
-        Toolkit.getDefaultToolkit().sync(); // prevents tearing on Linux
     }
 }

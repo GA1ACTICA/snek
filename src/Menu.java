@@ -1,19 +1,6 @@
-
-/*
-define a menu
-add elements to menu
-
-menu.show
-menu.close
-
-menu.backgroundColor/Image
-menu.borerColors/Images
-*/
-
 import java.awt.*;
-import java.awt.image.BufferStrategy;
 
-public class Menu {
+public class Menu implements Drawable {
 
         int sizeX = 300;
         int sizeY = 200;
@@ -23,6 +10,8 @@ public class Menu {
         int boarderWidth = 10;
         boolean resizable = false;
         boolean show = false;
+
+        boolean hasBoarders = true;
 
         Color cTopLeft = Color.BLUE;
         Color cTop = Color.CYAN;
@@ -45,35 +34,48 @@ public class Menu {
         Color backgroundColor = Color.WHITE;
         Image backgroundImage = null;
 
-        BufferStrategy backBuffer;
-        Graphics2D g;
-        Canvas c;
+        GameState gs;
+        Graphics g;
 
-        GameState gs = new GameState();
-
-
-        public Menu(Canvas c) {
-                
+        Menu(GameState gs) {
+                this.gs = gs;
         }
 
-        public void show(int sizeX, int sizeY, int startX, int startY, int boarderHeight, int boarderWidth,
+        @Override
+        public void draw(Graphics g) {
+
+                this.g = g;
+
+                if (show) {
+                        g.setColor(new Color(255, 0, 0));
+                        g.fillRect(startX, startY, sizeX, sizeY);
+                }
+        }
+
+        public void setSize(int sizeX, int sizeY, int startX, int startY) {
+
+                this.sizeX = sizeX;
+                this.sizeY = sizeY;
+                this.startX = startX;
+                this.startY = startY;
+                hasBoarders = false;
+                resizable = false;
+
+        }
+
+        public void setSize(int sizeX, int sizeY, int startX, int startY, int boarderHeight, int boarderWidth,
                         boolean resizable) {
 
+                // limit this to 0 < x
                 this.sizeX = sizeX;
                 this.sizeY = sizeY;
                 this.startX = startX;
                 this.startY = startY;
                 this.boarderHeight = boarderHeight;
                 this.boarderWidth = boarderWidth;
+
                 this.resizable = resizable;
                 show = true;
-
-        }
-
-        public void close() {
-
-                show = false;
-
         }
 
         public void backgroundColor(Color backgroundColor) {
@@ -102,6 +104,14 @@ public class Menu {
                 this.cBottom = bottom;
                 this.cBottomRight = bottomRight;
 
+                iTopLeft = null;
+                iTop = null;
+                iTopRight = null;
+                iLeft = null;
+                iRight = null;
+                iBottomLeft = null;
+                iBottom = null;
+                iBottomRight = null;
         }
 
         public void boarderImage(Image topLeft, Image top, Image topRight, Image left, Image right, Image bottomLeft,
@@ -116,6 +126,22 @@ public class Menu {
                 this.iBottom = bottom;
                 this.iBottomRight = bottomRight;
 
+                cTopLeft = null;
+                cTop = null;
+                cTopRight = null;
+                cLeft = null;
+                cRight = null;
+                cBottomLeft = null;
+                cBottom = null;
+                cBottomRight = null;
+
         }
 
+        public void show() {
+                show = true;
+        }
+
+        public void hide() {
+                show = false;
+        }
 }

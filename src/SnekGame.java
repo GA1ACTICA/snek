@@ -17,11 +17,12 @@ public class SnekGame implements Drawable {
     int snekUpdateGridY = 0;
 
     // appleIndexNumber is the number asigned to the cell that contains an apple.
-    // It is larger by one from the max grid since the snake can't be longer.
+    // It is larger by one from the max grid since the snake can't be longer than
+    // the max amount of grids.
     int appleIndexNumber = gridSizeX * gridSizeY + 1;
     byte appleCountOnScreenCurrentFrame = 0;
     byte appleCountOnScreenPreviousFrame = 0;
-    int maxAppleCountOnScreen = 3 - 1;
+    int maxAppleCountOnScreen = 3;
     public int applesEaten = 0;
 
     Image apple = new ImageIcon(getClass().getResource("sprites/Apple.png")).getImage();
@@ -48,8 +49,6 @@ public class SnekGame implements Drawable {
     Image tailNorth = new ImageIcon(getClass().getResource("sprites/North_Tail.png")).getImage();
     Image tailEast = new ImageIcon(getClass().getResource("sprites/East_Tail.png")).getImage();
 
-    // stores the numerical value for the latest pressed key
-
     long random;
 
     boolean west;
@@ -57,31 +56,35 @@ public class SnekGame implements Drawable {
     boolean north;
     boolean south = true;
 
-    int timeDelayed = 0;
-
-    public boolean alive = true;
+    int defaultUpdateinterval;
 
     Keys keys;
-    GameState gs = new GameState();
+    Menu menu;
+    GameState gs;
 
-    SnekGame(Keys keys) {
+    SnekGame(Keys keys, GameState gs, Menu menu) {
         this.keys = keys;
+        this.gs = gs;
+        this.menu = menu;
+        this.defaultUpdateinterval = gs.snekGameUpdateInterval;
+    }
+
+    public void updateGameLogic() {
+        inputUpade();
+
+        // exponential function to increase snek speed
+        gs.snekGameUpdateInterval = (int) (defaultUpdateinterval + (-10 * Math.round(30 + (-30 * Math.pow(0.9,
+                (double) applesEaten)))));
     }
 
     @Override
     public void draw(Graphics g) {
 
-        if (alive) {
-            inputUpade();
+        if (gs.alive) {
             drawSnekGame(g);
-        }
 
-        if (!alive) {
+        } else {
             gameOver(g);
-        }
-
-        if (gs.debug) {
-            System.out.println(" North: " + north + " South: " + south + " West: " + west + " East: " + east);
         }
 
     }
@@ -98,7 +101,7 @@ public class SnekGame implements Drawable {
 
                 // responsible for drawing logic
                 if (snekGrid[snekUpdateGridX][snekUpdateGridY] != 0) {
-                    drawSnek(snekUpdateGridX, snekUpdateGridY, alive, g);
+                    drawSnek(snekUpdateGridX, snekUpdateGridY, gs.alive, g);
                 }
 
                 // draws apple without any extra logic
@@ -117,7 +120,7 @@ public class SnekGame implements Drawable {
 
                 // responisble for placing tha apple
                 if (snekGrid[snekUpdateGridX][snekUpdateGridY] == 0
-                        && appleCountOnScreenCurrentFrame <= maxAppleCountOnScreen && 1 == random) {
+                        && appleCountOnScreenCurrentFrame <= maxAppleCountOnScreen - 1 && 1 == random) {
                     appleCountOnScreenCurrentFrame++;
                     drawApple(snekUpdateGridX, snekUpdateGridY, g);
                 }
@@ -132,38 +135,42 @@ public class SnekGame implements Drawable {
     }
 
     void inputUpade() {
+
+        if (gs.debug) {
+            System.out.println(" North: " + north + " South: " + south + " West: " + west + " East: " + east);
+        }
+
+        // TEMP: for menu testing
+        if (applesEaten > 3) {
+            menu.setSize(20, 30, 100, 100, 0, 0, false);
+            menu.show();
+        } else {
+            menu.hide();
+        }
+
         // reset appleCountOnScreenCurrentFrame
         appleCountOnScreenCurrentFrame = 0;
 
-        System.out.println("debug " + keys.keyNameTyped + " debug");
-
         // west = "a" or code "37"
         if ((keys.keyNamePressed == 'a' || keys.keyCodePressed == 37) && east == false) {
-            System.out.println("West");
             west = true;
             north = east = south = false;
         }
 
         // east = "d" or code "39"
         else if ((keys.keyNamePressed == 'd' || keys.keyCodePressed == 39) && west == false) {
-            System.out.println("East");
-
             east = true;
             north = west = south = false;
         }
 
         // north = "w" or code "38"
         else if ((keys.keyNamePressed == 'w' || keys.keyCodePressed == 38) && south == false) {
-            System.out.println("North");
-
             north = true;
             west = east = south = false;
         }
 
         // south = "s" or code "40"
         else if ((keys.keyNamePressed == 's' || keys.keyCodePressed == 40) && north == false) {
-            System.out.println("South");
-
             south = true;
             north = west = east = false;
         }
@@ -172,7 +179,7 @@ public class SnekGame implements Drawable {
         for (snekUpdateGridX = 1; snekUpdateGridX < gridSizeX + 1; snekUpdateGridX++) {
             for (snekUpdateGridY = 1; snekUpdateGridY < gridSizeY + 1; snekUpdateGridY++) {
                 if (snekGrid[snekUpdateGridX][snekUpdateGridY] == applesEaten + 3) {
-                    updateCellValue(snekUpdateGridX, snekUpdateGridY, west, east, south, north);
+                    updateCellValue(snekUpdateGridX, snekUpdateGridY, west, east, north, south);
                 }
 
                 if (snekGrid[snekUpdateGridX][snekUpdateGridY] == appleIndexNumber) {
@@ -182,7 +189,7 @@ public class SnekGame implements Drawable {
         }
 
         // apple eaten detection
-        if (appleCountOnScreenCurrentFrame >= appleCountOnScreenPreviousFrame && alive == true) {
+        if (appleCountOnScreenCurrentFrame >= appleCountOnScreenPreviousFrame && gs.alive == true) {
 
             // Update entire grid
             for (snekUpdateGridX = 1; snekUpdateGridX < gridSizeX + 2; snekUpdateGridX++) {
@@ -213,7 +220,7 @@ public class SnekGame implements Drawable {
 
                     // responsible for drawing logic
                     if (snekGrid[snekUpdateGridX][snekUpdateGridY] != 0) {
-                        drawSnek(snekUpdateGridX, snekUpdateGridY, alive, g);
+                        drawSnek(snekUpdateGridX, snekUpdateGridY, gs.alive, g);
                     }
 
                     // draws apple without any extra logic
@@ -228,7 +235,7 @@ public class SnekGame implements Drawable {
                 for (snekUpdateGridY = 1; snekUpdateGridY < gridSizeY + 1; snekUpdateGridY++) {
                     if (snekGrid[snekUpdateGridX][snekUpdateGridY] == applesEaten + 2) {
 
-                        // rule for head east
+                        // rule for deadHead east
                         if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX -
                                 1][snekUpdateGridY] + 1) {
                             g.drawImage(headEastDead, 160 + (30 * snekUpdateGridX), 25 + (30 *
@@ -237,7 +244,7 @@ public class SnekGame implements Drawable {
                             break deadHead;
                         }
 
-                        // rule for head south
+                        // rule for deadHead south
                         if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
                                 - 1] + 1) {
 
@@ -247,7 +254,7 @@ public class SnekGame implements Drawable {
                             break deadHead;
                         }
 
-                        // rule for head north
+                        // rule for deadHead north
                         if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
                                 + 1] + 1) {
 
@@ -256,7 +263,7 @@ public class SnekGame implements Drawable {
 
                             break deadHead;
                         }
-                        // rule for head west
+                        // rule for deadHead west
                         if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX +
                                 1][snekUpdateGridY] + 1) {
                             g.drawImage(headWestDead, 160 + (30 * snekUpdateGridX), 25 + (30 *
@@ -292,7 +299,7 @@ public class SnekGame implements Drawable {
                         || snekGrid[snekUpdateGridX + 1][snekUpdateGridY] != applesEaten + 3
                                 && snekGrid[snekUpdateGridX + 1][snekUpdateGridY] != appleIndexNumber
                                 && snekGrid[snekUpdateGridX + 1][snekUpdateGridY] != 0) {
-                    alive = false;
+                    gs.alive = false;
                 }
 
                 snekGrid[snekUpdateGridX + 1][snekUpdateGridY] = applesEaten + 4;
@@ -304,32 +311,32 @@ public class SnekGame implements Drawable {
                 if (snekUpdateGridX == 1 || snekGrid[snekUpdateGridX - 1][snekUpdateGridY] != applesEaten + 3
                         && snekGrid[snekUpdateGridX - 1][snekUpdateGridY] != appleIndexNumber
                         && snekGrid[snekUpdateGridX - 1][snekUpdateGridY] != 0) {
-                    alive = false;
+                    gs.alive = false;
                 }
 
                 snekGrid[snekUpdateGridX - 1][snekUpdateGridY] = applesEaten + 4;
                 break updateHead;
             }
 
-            // update head north / w or arrow up
-            if (north == true) {
+            // update head south / s or arrow down
+            if (south == true) {
                 if (snekUpdateGridY == gridSizeY
                         || snekGrid[snekUpdateGridX][snekUpdateGridY + 1] != applesEaten + 3
                                 && snekGrid[snekUpdateGridX][snekUpdateGridY + 1] != appleIndexNumber
                                 && snekGrid[snekUpdateGridX][snekUpdateGridY + 1] != 0) {
-                    alive = false;
+                    gs.alive = false;
                 }
 
                 snekGrid[snekUpdateGridX][snekUpdateGridY + 1] = applesEaten + 4;
                 break updateHead;
             }
 
-            // update head south / s or arrow down
-            if (south == true) {
+            // update head north / w or arrow up
+            if (north == true) {
                 if (snekUpdateGridY == 1 || snekGrid[snekUpdateGridX][snekUpdateGridY - 1] != applesEaten + 3
                         && snekGrid[snekUpdateGridX][snekUpdateGridY - 1] != appleIndexNumber
                         && snekGrid[snekUpdateGridX][snekUpdateGridY - 1] != 0) {
-                    alive = false;
+                    gs.alive = false;
                 }
 
                 snekGrid[snekUpdateGridX][snekUpdateGridY - 1] = applesEaten + 4;

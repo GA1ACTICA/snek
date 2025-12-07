@@ -45,8 +45,6 @@ public class Keys implements KeyListener {
         keyCodeTyped = e.getKeyCode();
         keyNameTyped = e.getKeyChar();
 
-        System.out.println("debug " + keyNameTyped + " debug");
-
         if (gs.debug) {
             System.out.println("keyCodePressed: " + keyCodePressed);
             System.out.println("keyNamePressed: " + keyNamePressed);
