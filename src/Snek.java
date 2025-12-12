@@ -1,17 +1,15 @@
 import java.awt.Dimension;
 import javax.swing.*;
 
+import GameEngine.*;
+
 public class Snek {
 
-    // window rules
-    static int width = 800;
-    static int height = 600;
-
-    static JFrame frame = new JFrame("Snek");
-    static GameState gs = new GameState();
-    static Keys keys = new Keys();
-    static GamePanel panel = new GamePanel(gs);
-    static GameUpdate gu = new GameUpdate(keys, gs, panel);
+    static final JFrame frame = new JFrame("Snek");
+    static final GameState gs = new GameState();
+    static final GamePanel panel = new GamePanel(gs);
+    static final Keys keys = new Keys(gs);
+    static final GameUpdate gu = new GameUpdate(keys, gs, panel);
 
     // Main Method
     public static void main(String args[]) {
@@ -19,14 +17,14 @@ public class Snek {
         panel.addKeyListener(keys);
         panel.setFocusable(true);
         panel.requestFocus();
-        panel.setPreferredSize(new Dimension(800, 600));
+        panel.setPreferredSize(new Dimension(gs.width, gs.height));
         panel.setBackground(gs.backgroundColor);
 
         frame.add(panel);
         frame.pack();
         frame.setVisible(true);
         frame.add(panel);
-        frame.setSize(width, height);
+        frame.setSize(gs.width, gs.height);
         frame.setVisible(true);
         frame.setResizable(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

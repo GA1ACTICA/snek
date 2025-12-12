@@ -1,5 +1,10 @@
-import javax.swing.ImageIcon;
+package Game;
+
 import java.awt.*;
+import javax.swing.ImageIcon;
+
+import Menu.Menu;
+import GameEngine.*;
 
 public class SnekGame implements Drawable {
 
@@ -25,29 +30,29 @@ public class SnekGame implements Drawable {
     int maxAppleCountOnScreen = 3;
     public int applesEaten = 0;
 
-    Image apple = new ImageIcon(getClass().getResource("sprites/Apple.png")).getImage();
+    Image apple = new ImageIcon(getClass().getResource("../sprites/Apple.png")).getImage();
 
-    Image headEast = new ImageIcon(getClass().getResource("sprites/Head_East.png")).getImage();
-    Image headNorth = new ImageIcon(getClass().getResource("sprites/Head_North.png")).getImage();
-    Image headSouth = new ImageIcon(getClass().getResource("sprites/Head_South.png")).getImage();
-    Image headWest = new ImageIcon(getClass().getResource("sprites/Head_West.png")).getImage();
+    Image headEast = new ImageIcon(getClass().getResource("../sprites/Head_East.png")).getImage();
+    Image headNorth = new ImageIcon(getClass().getResource("../sprites/Head_North.png")).getImage();
+    Image headSouth = new ImageIcon(getClass().getResource("../sprites/Head_South.png")).getImage();
+    Image headWest = new ImageIcon(getClass().getResource("../sprites/Head_West.png")).getImage();
 
-    Image headEastDead = new ImageIcon(getClass().getResource("sprites/Head_East_Dead.png")).getImage();
-    Image headNorthDead = new ImageIcon(getClass().getResource("sprites/Head_North_Dead.png")).getImage();
-    Image headSouthDead = new ImageIcon(getClass().getResource("sprites/Head_South_Dead.png")).getImage();
-    Image headWestDead = new ImageIcon(getClass().getResource("sprites/Head_West_Dead.png")).getImage();
+    Image headEastDead = new ImageIcon(getClass().getResource("../sprites/Head_East_Dead.png")).getImage();
+    Image headNorthDead = new ImageIcon(getClass().getResource("../sprites/Head_North_Dead.png")).getImage();
+    Image headSouthDead = new ImageIcon(getClass().getResource("../sprites/Head_South_Dead.png")).getImage();
+    Image headWestDead = new ImageIcon(getClass().getResource("../sprites/Head_West_Dead.png")).getImage();
 
-    Image eastSouthBody = new ImageIcon(getClass().getResource("sprites/East_South_Body.png")).getImage();
-    Image northEastBody = new ImageIcon(getClass().getResource("sprites/North_East_Body.png")).getImage();
-    Image northSouthBody = new ImageIcon(getClass().getResource("sprites/North_South_Body.png")).getImage();
-    Image northWestBody = new ImageIcon(getClass().getResource("sprites/North_West_Body.png")).getImage();
-    Image westEastBody = new ImageIcon(getClass().getResource("sprites/West_East_Body.png")).getImage();
-    Image westSouthBody = new ImageIcon(getClass().getResource("sprites/West_South_Body.png")).getImage();
+    Image eastSouthBody = new ImageIcon(getClass().getResource("../sprites/East_South_Body.png")).getImage();
+    Image northEastBody = new ImageIcon(getClass().getResource("../sprites/North_East_Body.png")).getImage();
+    Image northSouthBody = new ImageIcon(getClass().getResource("../sprites/North_South_Body.png")).getImage();
+    Image northWestBody = new ImageIcon(getClass().getResource("../sprites/North_West_Body.png")).getImage();
+    Image westEastBody = new ImageIcon(getClass().getResource("../sprites/West_East_Body.png")).getImage();
+    Image westSouthBody = new ImageIcon(getClass().getResource("../sprites/West_South_Body.png")).getImage();
 
-    Image tailWest = new ImageIcon(getClass().getResource("sprites/West_Tail.png")).getImage();
-    Image tailSouth = new ImageIcon(getClass().getResource("sprites/South_Tail.png")).getImage();
-    Image tailNorth = new ImageIcon(getClass().getResource("sprites/North_Tail.png")).getImage();
-    Image tailEast = new ImageIcon(getClass().getResource("sprites/East_Tail.png")).getImage();
+    Image tailWest = new ImageIcon(getClass().getResource("../sprites/West_Tail.png")).getImage();
+    Image tailSouth = new ImageIcon(getClass().getResource("../sprites/South_Tail.png")).getImage();
+    Image tailNorth = new ImageIcon(getClass().getResource("../sprites/North_Tail.png")).getImage();
+    Image tailEast = new ImageIcon(getClass().getResource("../sprites/East_Tail.png")).getImage();
 
     long random;
 
@@ -62,11 +67,12 @@ public class SnekGame implements Drawable {
     Menu menu;
     GameState gs;
 
-    SnekGame(Keys keys, GameState gs, Menu menu) {
+    public SnekGame(Keys keys, GameState gs, Menu menu) {
         this.keys = keys;
         this.gs = gs;
         this.menu = menu;
-        this.defaultUpdateinterval = gs.snekGameUpdateInterval;
+        this.defaultUpdateinterval = gs.snekGameUpdateInterval; // Get the update intervall before any changes take
+                                                                // place
     }
 
     public void updateGameLogic() {
@@ -142,7 +148,7 @@ public class SnekGame implements Drawable {
 
         // TEMP: for menu testing
         if (applesEaten > 3) {
-            menu.setSize(20, 30, 100, 100, 0, 0, false);
+            menu.setSize(100, 50, 100, 100, 30, 15, false);
             menu.show();
         } else {
             menu.hide();

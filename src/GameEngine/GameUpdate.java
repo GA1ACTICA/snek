@@ -1,13 +1,20 @@
+package GameEngine;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import Game.SnekGame;
+import Menu.Menu;
+
 public class GameUpdate implements Runnable {
 
-    GameState gs;
-    Menu menu;
-    SnekGame sg;
-    Keys keys;
-    GamePanel panel;
+    @SuppressWarnings("unused")
+    private final Keys keys; // if you want to have logic for menus or other classes in the loop below you
+                             // also have acces to key inputs eventhough they are not used in this example
+    private final Menu menu;
+    private final SnekGame sg;
+    private final GameState gs;
+    private final GamePanel panel;
 
     public static List<Drawable> drawables = new ArrayList<>();
 
@@ -16,7 +23,6 @@ public class GameUpdate implements Runnable {
     long currentTime;
 
     public GameUpdate(Keys keys, GameState gs, GamePanel panel) {
-
         this.gs = gs;
         this.keys = keys;
         this.panel = panel;
@@ -42,8 +48,16 @@ public class GameUpdate implements Runnable {
             currentTime = System.currentTimeMillis();
 
             if (currentTime - lastUpdateTime >= gs.snekGameUpdateInterval) {
+
                 sg.updateGameLogic();
+
                 lastUpdateTime = currentTime;
+
+                gs.width = panel.getWidth();
+                gs.height = panel.getHeight();
+
+                gs.x1 = (gs.width - 800) / 2;
+                gs.y1 = (gs.height - 600) / 2;
             }
 
             panel.repaint();

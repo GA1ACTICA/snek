@@ -1,3 +1,5 @@
+package GameEngine;
+
 import java.awt.Graphics;
 
 public interface Drawable {

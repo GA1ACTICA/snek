@@ -1,10 +1,14 @@
+package GameEngine;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class Keys implements KeyListener {
 
-    int keyCodePressed;
-    char keyNamePressed;
+    private final GameState gs;
+
+    public int keyCodePressed;
+    public char keyNamePressed;
 
     int keyCodeReleased;
     char keyNameReleased;
@@ -12,7 +16,9 @@ public class Keys implements KeyListener {
     int keyCodeTyped;
     char keyNameTyped;
 
-    GameState gs = new GameState();
+    public Keys(GameState gs) {
+        this.gs = gs;
+    }
 
     @Override
     public void keyPressed(KeyEvent e) {
@@ -20,9 +26,8 @@ public class Keys implements KeyListener {
         keyNamePressed = e.getKeyChar();
 
         if (gs.debug) {
-            System.out.println("keyCodePressed: " + keyCodePressed);
-            System.out.println("keyNamePressed: " + keyNamePressed);
-            System.out.println("");
+            System.out.println("keyCodePressed: " + keyCodePressed + '\n');
+            System.out.println("keyNamePressed: " + keyNamePressed + '\n');
         }
 
     }
@@ -33,8 +38,8 @@ public class Keys implements KeyListener {
         keyNameReleased = e.getKeyChar();
 
         if (gs.debug) {
-            System.out.println("keyCodePressed: " + keyCodePressed);
-            System.out.println("keyNamePressed: " + keyNamePressed);
+            System.out.println("keyCodePressed: " + keyCodePressed + '\n');
+            System.out.println("keyNamePressed: " + keyNamePressed + '\n');
             System.out.println("");
         }
 
@@ -46,8 +51,8 @@ public class Keys implements KeyListener {
         keyNameTyped = e.getKeyChar();
 
         if (gs.debug) {
-            System.out.println("keyCodePressed: " + keyCodePressed);
-            System.out.println("keyNamePressed: " + keyNamePressed);
+            System.out.println("keyCodePressed: " + keyCodePressed + '\n');
+            System.out.println("keyNamePressed: " + keyNamePressed + '\n');
             System.out.println("");
         }
 
