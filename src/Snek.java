@@ -9,27 +9,25 @@ public class Snek {
     static final GameState gs = new GameState();
     static final GamePanel panel = new GamePanel(gs);
     static final Keys keys = new Keys(gs);
-    static final GameUpdate gu = new GameUpdate(keys, gs, panel);
+    static final GameUpdate gu = new GameUpdate(keys, gs, panel, frame);
 
-    // Main Method
-    public static void main(String args[]) {
+    public static void main(String[] args) {
 
-        panel.addKeyListener(keys);
-        panel.setFocusable(true);
-        panel.requestFocus();
+        // PANEL setup
+        panel.setLayout(null);
         panel.setPreferredSize(new Dimension(gs.width, gs.height));
         panel.setBackground(gs.backgroundColor);
+        panel.setFocusable(true);
+        panel.addKeyListener(keys);
 
-        frame.add(panel);
+        // FRAME setup
+        frame.setContentPane(panel);
         frame.pack();
-        frame.setVisible(true);
-        frame.add(panel);
-        frame.setSize(gs.width, gs.height);
-        frame.setVisible(true);
         frame.setResizable(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
 
-        Thread thread = new Thread(gu);
-        thread.start();
+        // Start game loop
+        new Thread(gu).start();
     }
 }

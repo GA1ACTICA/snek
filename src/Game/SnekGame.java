@@ -1,9 +1,11 @@
 package Game;
 
 import java.awt.*;
-import javax.swing.ImageIcon;
 
-import Menu.Menu;
+import javax.swing.JButton;
+
+import AdvancedRendering.*;
+import AdvancedRendering.Menu;
 import GameEngine.*;
 
 public class SnekGame implements Drawable {
@@ -30,30 +32,6 @@ public class SnekGame implements Drawable {
     int maxAppleCountOnScreen = 3;
     public int applesEaten = 0;
 
-    Image apple = new ImageIcon(getClass().getResource("../sprites/Apple.png")).getImage();
-
-    Image headEast = new ImageIcon(getClass().getResource("../sprites/Head_East.png")).getImage();
-    Image headNorth = new ImageIcon(getClass().getResource("../sprites/Head_North.png")).getImage();
-    Image headSouth = new ImageIcon(getClass().getResource("../sprites/Head_South.png")).getImage();
-    Image headWest = new ImageIcon(getClass().getResource("../sprites/Head_West.png")).getImage();
-
-    Image headEastDead = new ImageIcon(getClass().getResource("../sprites/Head_East_Dead.png")).getImage();
-    Image headNorthDead = new ImageIcon(getClass().getResource("../sprites/Head_North_Dead.png")).getImage();
-    Image headSouthDead = new ImageIcon(getClass().getResource("../sprites/Head_South_Dead.png")).getImage();
-    Image headWestDead = new ImageIcon(getClass().getResource("../sprites/Head_West_Dead.png")).getImage();
-
-    Image eastSouthBody = new ImageIcon(getClass().getResource("../sprites/East_South_Body.png")).getImage();
-    Image northEastBody = new ImageIcon(getClass().getResource("../sprites/North_East_Body.png")).getImage();
-    Image northSouthBody = new ImageIcon(getClass().getResource("../sprites/North_South_Body.png")).getImage();
-    Image northWestBody = new ImageIcon(getClass().getResource("../sprites/North_West_Body.png")).getImage();
-    Image westEastBody = new ImageIcon(getClass().getResource("../sprites/West_East_Body.png")).getImage();
-    Image westSouthBody = new ImageIcon(getClass().getResource("../sprites/West_South_Body.png")).getImage();
-
-    Image tailWest = new ImageIcon(getClass().getResource("../sprites/West_Tail.png")).getImage();
-    Image tailSouth = new ImageIcon(getClass().getResource("../sprites/South_Tail.png")).getImage();
-    Image tailNorth = new ImageIcon(getClass().getResource("../sprites/North_Tail.png")).getImage();
-    Image tailEast = new ImageIcon(getClass().getResource("../sprites/East_Tail.png")).getImage();
-
     long random;
 
     boolean west;
@@ -63,16 +41,54 @@ public class SnekGame implements Drawable {
 
     int defaultUpdateinterval;
 
+    Image apple, headEast, headNorth, headSouth, headWest, headEastDead, headNorthDead, headSouthDead, headWestDead,
+            northSouthBody, westEastBody, eastSouthBody, northEastBody, northWestBody, westSouthBody, tailWest,
+            tailSouth, tailNorth, tailEast;
+
     Keys keys;
     Menu menu;
     GameState gs;
+    AdvancedGraphics advanced;
+    EngineTools tools;
 
-    public SnekGame(Keys keys, GameState gs, Menu menu) {
+    public SnekGame(Keys keys, GameState gs, Menu menu, AdvancedGraphics advanced, EngineTools tools) {
         this.keys = keys;
         this.gs = gs;
         this.menu = menu;
+        this.advanced = advanced;
+        this.tools = tools;
         this.defaultUpdateinterval = gs.snekGameUpdateInterval; // Get the update intervall before any changes take
                                                                 // place
+
+        this.apple = tools.getImage("sprites/Apple.png");
+
+        this.headEast = tools.getImage("sprites/Head_East.png");
+        this.headNorth = tools.getImage("sprites/Head_North.png");
+        this.headSouth = tools.getImage("sprites/Head_South.png");
+        this.headWest = tools.getImage("sprites/Head_West.png");
+
+        this.headEastDead = tools.getImage("sprites/Head_East_Dead.png");
+        this.headNorthDead = tools.getImage("sprites/Head_North_Dead.png");
+        this.headSouthDead = tools.getImage("sprites/Head_South_Dead.png");
+        this.headWestDead = tools.getImage("sprites/Head_West_Dead.png");
+
+        this.northSouthBody = tools.getImage("sprites/North_South_Body.png");
+        this.westEastBody = tools.getImage("sprites/West_East_Body.png");
+
+        this.eastSouthBody = tools.getImage("sprites/East_South_Body.png");
+        this.northEastBody = tools.getImage("sprites/North_East_Body.png");
+        this.northWestBody = tools.getImage("sprites/North_West_Body.png");
+        this.westSouthBody = tools.getImage("sprites/West_South_Body.png");
+
+        this.tailWest = tools.getImage("sprites/West_Tail.png");
+        this.tailSouth = tools.getImage("sprites/South_Tail.png");
+        this.tailNorth = tools.getImage("sprites/North_Tail.png");
+        this.tailEast = tools.getImage("sprites/East_Tail.png");
+
+        menu.setSize(100, 50, 100, 100, 30, 15, false);
+
+        JButton test = menu.addButton(10, 10, 30, 30, false, false, "test");
+        menu.setButtonColor(test, new Color(255, 0, 0));
     }
 
     public void updateGameLogic() {
@@ -92,7 +108,6 @@ public class SnekGame implements Drawable {
         } else {
             gameOver(g);
         }
-
     }
 
     public void drawSnekGame(Graphics g) {
@@ -112,7 +127,8 @@ public class SnekGame implements Drawable {
 
                 // draws apple without any extra logic
                 if (snekGrid[snekUpdateGridX][snekUpdateGridY] == appleIndexNumber) {
-                    g.drawImage(apple, 160 + (30 * snekUpdateGridX), 37 + (30 * snekUpdateGridY), 120, 120,
+                    g.drawImage(apple, 160 + (30 * snekUpdateGridX), 37 + (30 * snekUpdateGridY), 120,
+                            120,
                             null);
                 }
             }
@@ -148,7 +164,6 @@ public class SnekGame implements Drawable {
 
         // TEMP: for menu testing
         if (applesEaten > 3) {
-            menu.setSize(100, 50, 100, 100, 30, 15, false);
             menu.show();
         } else {
             menu.hide();
@@ -231,7 +246,8 @@ public class SnekGame implements Drawable {
 
                     // draws apple without any extra logic
                     if (snekGrid[snekUpdateGridX][snekUpdateGridY] == appleIndexNumber) {
-                        g.drawImage(apple, 160 + (30 * snekUpdateGridX), 37 + (30 * snekUpdateGridY), 120, 120,
+                        g.drawImage(apple, 160 + (30 * snekUpdateGridX), 37 + (30 * snekUpdateGridY),
+                                120, 120,
                                 null);
                     }
                 }
@@ -421,7 +437,8 @@ public class SnekGame implements Drawable {
                                 + 1
                                 && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
                                         - 1] - 1) {
-                    g.drawImage(northSouthBody, 160 + (30 * snekUpdateGridX), 25 + (30 * snekUpdateGridY), 120, 120,
+                    g.drawImage(northSouthBody, 160 + (30 * snekUpdateGridX),
+                            25 + (30 * snekUpdateGridY), 120, 120,
                             null);
                     break body;
                 }
@@ -436,7 +453,8 @@ public class SnekGame implements Drawable {
                                 + 1
                                 && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX
                                         - 1][snekUpdateGridY] - 1) {
-                    g.drawImage(westEastBody, 160 + (30 * snekUpdateGridX), 25 + (30 * snekUpdateGridY), 120, 120,
+                    g.drawImage(westEastBody, 160 + (30 * snekUpdateGridX),
+                            25 + (30 * snekUpdateGridY), 120, 120,
                             null);
                     break body;
                 }
@@ -451,7 +469,8 @@ public class SnekGame implements Drawable {
                                 - 1
                                 && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
                                         - 1] + 1) {
-                    g.drawImage(northEastBody, 164 + (30 * snekUpdateGridX), 21 + (30 * snekUpdateGridY), 120, 120,
+                    g.drawImage(northEastBody, 164 + (30 * snekUpdateGridX),
+                            21 + (30 * snekUpdateGridY), 120, 120,
                             null);
                     break body;
                 }
@@ -466,7 +485,8 @@ public class SnekGame implements Drawable {
                                 - 1
                                 && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
                                         + 1] + 1) {
-                    g.drawImage(westSouthBody, 156 + (30 * snekUpdateGridX), 29 + (30 * snekUpdateGridY), 120, 120,
+                    g.drawImage(westSouthBody, 156 + (30 * snekUpdateGridX),
+                            29 + (30 * snekUpdateGridY), 120, 120,
                             null);
                     break body;
                 }
@@ -481,7 +501,8 @@ public class SnekGame implements Drawable {
                                 - 1
                                 && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
                                         - 1] + 1) {
-                    g.drawImage(northWestBody, 156 + (30 * snekUpdateGridX), 21 + (30 * snekUpdateGridY), 120, 120,
+                    g.drawImage(northWestBody, 156 + (30 * snekUpdateGridX),
+                            21 + (30 * snekUpdateGridY), 120, 120,
                             null);
                     break body;
                 }
@@ -496,7 +517,8 @@ public class SnekGame implements Drawable {
                                 - 1
                                 && snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX][snekUpdateGridY
                                         + 1] + 1) {
-                    g.drawImage(eastSouthBody, 164 + (30 * snekUpdateGridX), 29 + (30 * snekUpdateGridY), 120, 120,
+                    g.drawImage(eastSouthBody, 164 + (30 * snekUpdateGridX),
+                            29 + (30 * snekUpdateGridY), 120, 120,
                             null);
                     break body;
                 }
@@ -510,7 +532,8 @@ public class SnekGame implements Drawable {
                 // rule for tail west
                 if (snekGrid[snekUpdateGridX][snekUpdateGridY] == snekGrid[snekUpdateGridX + 1][snekUpdateGridY]
                         - 1) {
-                    g.drawImage(tailWest, 160 + (30 * snekUpdateGridX), 25 + (30 * snekUpdateGridY), 120, 120,
+                    g.drawImage(tailWest, 160 + (30 * snekUpdateGridX), 25 + (30 * snekUpdateGridY),
+                            120, 120,
                             null);
                     break tail;
                 }

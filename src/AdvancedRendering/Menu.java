@@ -1,6 +1,9 @@
-package Menu;
+package AdvancedRendering;
 
 import java.awt.*;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
 
 import GameEngine.*;
 
@@ -40,9 +43,12 @@ public class Menu implements Drawable {
 
         GameState gs;
         Graphics g;
+        JButton button;
+        JFrame frame;
 
-        public Menu(GameState gs) {
+        public Menu(GameState gs, JFrame frame) {
                 this.gs = gs;
+                this.frame = frame;
         }
 
         @Override
@@ -50,13 +56,13 @@ public class Menu implements Drawable {
 
                 if (show) {
 
-                        // setSize
+                        // setSize for menu without boarders
                         if (!hasBoarders && !resizable) {
                                 g.setColor(backgroundColor);
                                 g.fillRect(startX, startY, sizeX, sizeY);
                         }
 
-                        // setSize
+                        // setSize for menu with boarders
                         if (hasBoarders) {
                                 g.setColor(backgroundColor);
                                 g.fillRect(startX, startY, sizeX, sizeY);
@@ -159,8 +165,9 @@ public class Menu implements Drawable {
         }
 
         /**
+         * @param backgroundColor Sets the menues background color
          * 
-         * @param backgroundColor
+         * @see #backgroundImage(Image backgroundImage)
          */
         public void backgroundColor(Color backgroundColor) {
 
@@ -170,7 +177,9 @@ public class Menu implements Drawable {
         }
 
         /**
-         * @param backgroundImage
+         * @param backgroundColor Sets the menues background image
+         * 
+         * @see #backgroundColor(Color backgroundColor)
          */
         public void backgroundImage(Image backgroundImage) {
 
@@ -180,14 +189,27 @@ public class Menu implements Drawable {
         }
 
         /**
-         * @param topLeft
-         * @param top
-         * @param topRight
-         * @param left
-         * @param right
-         * @param bottomLeft
-         * @param bottom
-         * @param bottomRight
+         * Sets the color for every corner on the menu
+         * 
+         * @param topLeft     Sets the color for the top left rectangle
+         * 
+         * @param top         Sets the color for the top rectangle
+         * 
+         * @param topRight    Sets the color for the top right rectangle
+         * 
+         * @param left        Sets the color for the left rectangle
+         * 
+         * @param right       Sets the color for the right rectangle
+         * 
+         * @param bottomLeft  Sets the color for the bottom left rectangle
+         * 
+         * @param bottom      Sets the color for the bottom rectangle
+         * 
+         * @param bottomRight Sets the color for the bottom right rectangle
+         * 
+         * @see #boarderImage(Image topLeft, Image top, Image topRight, Image left,
+         *      Image right, Image bottomLeft,
+         *      Image bottom, Image bottomRight)
          */
         public void boarderColors(Color topLeft, Color top, Color topRight, Color left, Color right, Color bottomLeft,
                         Color bottom, Color bottomRight) {
@@ -212,14 +234,27 @@ public class Menu implements Drawable {
         }
 
         /**
-         * @param topLeft
-         * @param top
-         * @param topRight
-         * @param left
-         * @param right
-         * @param bottomLeft
-         * @param bottom
-         * @param bottomRight
+         * Sets the image for every corner on the menu
+         * 
+         * @param topLeft     Sets the image for the top left rectangle
+         * 
+         * @param top         Sets the image for the top rectangle
+         * 
+         * @param topRight    Sets the image for the top right rectangle
+         * 
+         * @param left        Sets the image for the left rectangle
+         * 
+         * @param right       Sets the image for the right rectangle
+         * 
+         * @param bottomLeft  Sets the image for the bottom left rectangle
+         * 
+         * @param bottom      Sets the image for the bottom rectangle
+         * 
+         * @param bottomRight Sets the image for the bottom right rectangle
+         * 
+         * @see #boarderColors(Color topLeft, Color top, Color topRight, Color left,
+         *      Color right, Color bottomLeft,
+         *      Color bottom, Color bottomRight)
          */
         public void boarderImage(Image topLeft, Image top, Image topRight, Image left, Image right, Image bottomLeft,
                         Image bottom, Image bottomRight) {
@@ -246,9 +281,41 @@ public class Menu implements Drawable {
 
         public void show() {
                 show = true;
+                if (this.button != null) {
+                        this.button.setVisible(true);
+                }
+
         }
 
         public void hide() {
                 show = false;
+
+                if (this.button != null) {
+                        this.button.setVisible(false);
+                }
+
+        }
+
+        public JButton addButton(int startX, int startY, int sizeX, int sizeY, boolean borderPainted,
+                        boolean foucusPainted, String buttonLable) {
+
+                JButton button = new JButton(buttonLable);
+
+                this.button = button;
+
+                button.setBounds(startX, startY, sizeX, sizeY);
+                button.setBorderPainted(borderPainted);
+                button.setFocusPainted(foucusPainted);
+
+                frame.add(button);
+
+                button.setVisible(true);
+
+                return button;
+        }
+
+        public void setButtonColor(JButton button, Color buttonColor) {
+                button.setBackground(buttonColor);
+
         }
 }
